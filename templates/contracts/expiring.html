@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Hợp đồng sắp hết hạn{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-exclamation-triangle text-warning"></i> Hợp đồng sắp hết hạn (30 ngày)</h2>
+        <a href="{{ url_for('contracts.list') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+    </div>
+    
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="days" class="form-label"><i class="bi bi-calendar-event"></i> Hết hạn trong (ngày)</label>
+                    <input type="number" class="form-control" id="days" name="days" 
+                           value="{{ days_threshold|default(30) }}" min="1" max="365">
+                    <small class="text-muted">Cảnh báo hợp đồng sắp hết hạn</small>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Lọc
+                    </button>
+                </div>
+                <div class="col-md-7 d-flex align-items-end">
+                    <div class="btn-group">
+                        <a href="?days=7" class="btn btn-outline-warning btn-sm">7 ngày</a>
+                        <a href="?days=15" class="btn btn-outline-warning btn-sm">15 ngày</a>
+                        <a href="?days=30" class="btn btn-outline-warning btn-sm active">30 ngày</a>
+                        <a href="?days=60" class="btn btn-outline-warning btn-sm">60 ngày</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if expiring_contracts %}
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-info-circle"></i> Có <strong>{{ expiring_contracts|length }}</strong> hợp đồng sắp hết hạn trong {{ days_threshold|default(30) }} ngày tới
+    </div>
+    {% endif %}
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-warning">
+                        <tr>
+                            <th>Mã HĐ</th>
+                            <th>Mã KH</th>
+                            <th>Tên khách hàng</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày hết hạn</th>
+                            <th>Còn lại</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contract in expiring_contracts %}
+                        {% set days_left = (contract.NgayHetHan - now()).days if contract.NgayHetHan else 0 %}
+                        <tr class="{{ 'table-danger' if days_left <= 7 else '' }}">
+                            <td><strong>{{ contract.maHopDong }}</strong></td>
+                            <td>{{ contract.maKhachHang }}</td>
+                            <td>{{ contract.tenKhachHang }}</td>
+                            <td>{{ contract.ngayBatDau.strftime('%d/%m/%Y') if contract.ngayBatDau else '' }}</td>
+                            <td>{{ contract.NgayHetHan.strftime('%d/%m/%Y') if contract.NgayHetHan else '' }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'danger' if days_left <= 7 else 'warning' }}">
+                                    {{ days_left }} ngày
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('contracts.detail', id=contract.maHopDong) }}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> Xem
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                                <p class="mt-2">Không có hợp đồng nào sắp hết hạn</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

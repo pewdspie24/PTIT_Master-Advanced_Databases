@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách Nhân viên{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-person-badge"></i> Danh sách Nhân viên</h1>
+
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('employees.list') }}" class="row g-3">
+            <div class="col-md-10">
+                <select name="branch" class="form-select">
+                    <option value="">-- Tất cả chi nhánh --</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.maChiNhanh }}" {% if branch_filter == branch.maChiNhanh %}selected{% endif %}>
+                        {{ branch.ten }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter"></i> Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Employee Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã NV</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Chi nhánh</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees %}
+                    <tr>
+                        <td><strong>{{ emp.maNhanVien }}</strong></td>
+                        <td>{{ emp.ho }} {{ emp.tenDem }} {{ emp.tenRieng }}</td>
+                        <td>{{ emp.email or 'N/A' }}</td>
+                        <td>{{ emp.tenChiNhanh }}</td>
+                        <td>
+                            {% if emp.vaiTro == 'Quản Lý' %}
+                                <span class="badge bg-danger">{{ emp.vaiTro }}</span>
+                            {% elif emp.vaiTro == 'Kế Toán' %}
+                                <span class="badge bg-success">{{ emp.vaiTro }}</span>
+                            {% elif emp.vaiTro == 'Lắp Đặt' %}
+                                <span class="badge bg-warning">{{ emp.vaiTro }}</span>
+                            {% elif emp.vaiTro == 'Hỗ Trợ' %}
+                                <span class="badge bg-info">{{ emp.vaiTro }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ emp.vaiTro }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if emp.trangThai == 'Dang lam viec' %}
+                                <span class="badge bg-success">Đang làm việc</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ emp.trangThai }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('employees.detail', id=emp.maNhanVien) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Không tìm thấy nhân viên</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

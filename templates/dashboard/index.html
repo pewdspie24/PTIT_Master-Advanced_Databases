@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Quản Lý Điện Lực{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-people"></i> Khách hàng</h5>
+                <h2 class="card-text">{{ total_customers }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-person-badge"></i> Nhân viên</h5>
+                <h2 class="card-text">{{ total_employees }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-speedometer"></i> Công tơ</h5>
+                <h2 class="card-text">{{ total_meters }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-receipt"></i> Hóa đơn chưa thanh toán</h5>
+                <h2 class="card-text">{{ unpaid_invoices }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Thao tác nhanh</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ url_for('customers.add') }}" class="btn btn-primary">
+                        <i class="bi bi-person-plus"></i> Thêm khách hàng
+                    </a>
+                    <a href="{{ url_for('invoices.overdue') }}" class="btn btn-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Hóa đơn quá hạn
+                    </a>
+                    <a href="{{ url_for('meters.maintenance_alerts') }}" class="btn btn-danger">
+                        <i class="bi bi-tools"></i> Cảnh báo bảo trì
+                    </a>
+                    <a href="{{ url_for('meters.abnormal_consumption') }}" class="btn btn-info">
+                        <i class="bi bi-graph-up-arrow"></i> Tiêu thụ bất thường
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Invoices -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Hóa đơn gần đây</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã công tơ</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày lập</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in recent_invoices %}
+                            <tr>
+                                <td>{{ invoice.maCongTo }}</td>
+                                <td>{{ invoice.tenKhachHang }}</td>
+                                <td>{{ invoice.ngayLapDon }}</td>
+                                <td>
+                                    {% if invoice.trangThaiTT == 'Da thanh toan' %}
+                                        <span class="badge bg-success">{{ invoice.trangThaiTT }}</span>
+                                    {% elif invoice.trangThaiTT == 'Chua thanh toan' %}
+                                        <span class="badge bg-warning">{{ invoice.trangThaiTT }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ invoice.trangThaiTT }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Chưa có hóa đơn</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

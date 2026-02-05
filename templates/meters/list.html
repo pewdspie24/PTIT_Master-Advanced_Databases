@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách Công tơ điện{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-speedometer"></i> Danh sách Công tơ điện</h1>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã công tơ</th>
+                        <th>Khách hàng</th>
+                        <th>Địa chỉ</th>
+                        <th>Ngày lắp đặt</th>
+                        <th>Hạn sử dụng (năm)</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for meter in meters %}
+                    <tr>
+                        <td><strong>{{ meter.maCongTo }}</strong></td>
+                        <td>{{ meter.tenKhachHang }}</td>
+                        <td>{{ meter.diaChi }}</td>
+                        <td>{{ meter.ngayLapDat }}</td>
+                        <td>{{ meter.hanSuDung }}</td>
+                        <td>
+                            <a href="{{ url_for('meters.detail', id=meter.maCongTo) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i> Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Chưa có công tơ điện</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Cảnh báo Bảo trì Công tơ{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-tools text-danger"></i> Cảnh báo Bảo trì Công tơ</h1>
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>Danh sách công tơ đã hết hạn sử dụng và cần bảo trì/thay thế</strong>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã công tơ</th>
+                        <th>Ngày lắp đặt</th>
+                        <th>Niên hạn (thangs)</th>
+                        <th>Đã sử dụng (năm)</th>
+                        <th>Địa chỉ</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alert in alerts %}
+                    <tr>
+                        <td><strong>{{ alert.maCongTo or alert[0] }}</strong></td>
+                        <td>{{ alert.ngayLapDat or alert[1] }}</td>
+                        <td>{{ alert.NienHan_Nam or alert[2] }}</td>
+                        <td><span class="badge bg-danger">{{ alert.DaSuDung_Nam or alert[3] }}</span></td>
+                        <td>{{ alert.DiaChiLapDat or alert[4] }}</td>
+                        <td><span class="badge bg-danger">Cần bảo trì</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-success">
+                            <i class="bi bi-check-circle"></i> Tất cả công tơ đang hoạt động tốt
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

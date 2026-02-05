@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Thêm Hỗ trợ Khách hàng{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-headset"></i> Thêm Hỗ trợ Khách hàng</h2>
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('contracts.add_support') }}">
+                <div class="mb-3">
+                    <label class="form-label">Nhân viên hỗ trợ *</label>
+                    <select class="form-select" name="maNVHoTro" required>
+                        {% for staff in support_staff %}
+                        <option value="{{ staff.maNhanVien }}">{{ staff.ho }} {{ staff.tenRieng }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Khách hàng *</label>
+                    <select class="form-select" name="maKhachHang" required>
+                        {% for customer in customers %}
+                        <option value="{{ customer.maKhachHang }}">{{ customer.tenKhachHang }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Lý do hỗ trợ *</label>
+                    <textarea class="form-control" name="lyDoHoTro" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Thêm</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Thêm Nhân viên{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-person-plus"></i> Thêm Nhân viên mới</h2>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('employees.add') }}">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Mã nhân viên *</label>
+                            <input type="text" class="form-control" name="maNhanVien" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Họ *</label>
+                            <input type="text" class="form-control" name="ho" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Tên đệm</label>
+                            <input type="text" class="form-control" name="tenDem">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Tên *</label>
+                            <input type="text" class="form-control" name="tenRieng" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Ngày sinh *</label>
+                            <input type="date" class="form-control" name="ngaySinh" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Mã số thuế *</label>
+                            <input type="text" class="form-control" name="maSoThue" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Chi nhánh *</label>
+                            <select class="form-select" name="maChiNhanh" required>
+                                {% for branch in branches %}
+                                <option value="{{ branch.maChiNhanh }}">{{ branch.ten }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Vai trò *</label>
+                            <select class="form-select" name="role" id="roleSelect" required>
+                                <option value="LapDat">Lắp đặt</option>
+                                <option value="QuanLy">Quản lý</option>
+                                <option value="HoTro">Hỗ trợ</option>
+                                <option value="KeToan">Kế toán</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Role-specific fields -->
+                <div id="lapDatFields" class="role-specific">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Số thẻ kỹ thuật</label>
+                                <input type="text" class="form-control" name="soTheKyThuat">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Chứng chỉ an toàn điện</label>
+                                <input type="text" class="form-control" name="ccAnToanDien">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="quanLyFields" class="role-specific" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Bậc quản lý</label>
+                        <input type="number" class="form-control" name="maBacQuanLy" value="1">
+                    </div>
+                </div>
+                
+                <div id="hoTroFields" class="role-specific" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Loại hỗ trợ</label>
+                        <input type="text" class="form-control" name="loaiHoTro" value="KhachHang">
+                    </div>
+                </div>
+                
+                <div id="keToanFields" class="role-specific" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Chứng chỉ kế toán</label>
+                        <input type="text" class="form-control" name="chungChiKeToan">
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Thêm nhân viên
+                    </button>
+                    <a href="{{ url_for('employees.list') }}" class="btn btn-secondary">
+                        <i class="bi bi-x"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('roleSelect').addEventListener('change', function() {
+    document.querySelectorAll('.role-specific').forEach(el => el.style.display = 'none');
+    const role = this.value;
+    if (role === 'LapDat') document.getElementById('lapDatFields').style.display = 'block';
+    else if (role === 'QuanLy') document.getElementById('quanLyFields').style.display = 'block';
+    else if (role === 'HoTro') document.getElementById('hoTroFields').style.display = 'block';
+    else if (role === 'KeToan') document.getElementById('keToanFields').style.display = 'block';
+});
+</script>
+{% endblock %}

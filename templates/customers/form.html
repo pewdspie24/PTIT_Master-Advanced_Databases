@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}{% if customer %}Chỉnh sửa{% else %}Thêm{% endif %} Khách hàng{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1 class="mb-4">
+            <i class="bi bi-person-{% if customer %}pencil{% else %}plus{% endif %}"></i>
+            {% if customer %}Chỉnh sửa{% else %}Thêm mới{% endif %} Khách hàng
+        </h1>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="maKhachHang" class="form-label">Mã khách hàng <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="maKhachHang" name="maKhachHang" 
+                               value="{{ customer.maKhachHang if customer else '' }}" 
+                               {% if customer %}readonly{% else %}required{% endif %}>
+                        {% if customer %}<small class="text-muted">Không thể thay đổi mã khách hàng</small>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tenKhachHang" class="form-label">Tên khách hàng <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="tenKhachHang" name="tenKhachHang" 
+                               value="{{ customer.tenKhachHang if customer else '' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="maSoThue" class="form-label">Mã số thuế</label>
+                        <input type="text" class="form-control" id="maSoThue" name="maSoThue" 
+                               value="{{ customer.maSoThue if customer else '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="diaChi" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="diaChi" name="diaChi" rows="2" required>{{ customer.diaChi if customer else '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="maChiNhanh" class="form-label">Chi nhánh <span class="text-danger">*</span></label>
+                        <select class="form-select" id="maChiNhanh" name="maChiNhanh" required>
+                            <option value="">-- Chọn chi nhánh --</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch.maChiNhanh }}" 
+                                    {% if customer and customer.maChiNhanh == branch.maChiNhanh %}selected{% endif %}>
+                                {{ branch.ten }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="maBangGiaDien" class="form-label">Loại giá điện <span class="text-danger">*</span></label>
+                        <select class="form-select" id="maBangGiaDien" name="maBangGiaDien" required>
+                            <option value="">-- Chọn loại giá --</option>
+                            {% for pricing in pricing_tables %}
+                            <option value="{{ pricing.ma }}" 
+                                    {% if customer and customer.maBangGiaDien == pricing.ma %}selected{% endif %}>
+                                {{ pricing.tenBang }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if not customer %}
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <div id="phoneNumbers">
+                            <div class="input-group mb-2">
+                                <input type="tel" class="form-control" name="soDienThoai[]" placeholder="Nhập số điện thoại">
+                                <button type="button" class="btn btn-success" onclick="addPhone()">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted">Nhấn + để thêm số điện thoại</small>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Lưu
+                        </button>
+                        <a href="{{ url_for('customers.list') }}" class="btn btn-secondary">
+                            <i class="bi bi-x"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addPhone() {
+    const container = document.getElementById('phoneNumbers');
+    const div = document.createElement('div');
+    div.className = 'input-group mb-2';
+    div.innerHTML = `
+        <input type="tel" class="form-control" name="soDienThoai[]" placeholder="Nhập số điện thoại">
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">
+            <i class="bi bi-trash"></i>
+        </button>
+    `;
+    container.appendChild(div);
+}
+</script>
+{% endblock %}

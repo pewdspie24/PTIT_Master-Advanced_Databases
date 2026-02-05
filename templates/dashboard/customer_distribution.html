@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Phân bổ Khách hàng{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-pie-chart"></i> Phân bổ Khách hàng theo Loại hình sử dụng điện</h2>
+    
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="branch" class="form-label"><i class="bi bi-building"></i> Chi Nhánh</label>
+                    <select class="form-select" id="branch" name="branch">
+                        {% for branch in branches %}
+                        <option value="{{ branch.maChiNhanh }}" {% if branch.maChiNhanh == branch_id %}selected{% endif %}>
+                            {{ branch.ten }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Loại hình sử dụng</th>
+                        <th>Số lượng khách</th>
+                        <th>Tỷ lệ %</th>
+                        <th>Biểu đồ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in distribution %}
+                    <tr>
+                        <td><strong>{{ item.LoaiHinhSuDung }}</strong></td>
+                        <td>{{ item.SoLuongKhach }}</td>
+                        <td>{{ "%.2f"|format(item.TyLePhanTram) }}%</td>
+                        <td>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ item.TyLePhanTram }}%"
+                                     aria-valuenow="{{ item.TyLePhanTram }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ "%.1f"|format(item.TyLePhanTram) }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

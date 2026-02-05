@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Quản Lý Điện Lực{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
+                <i class="bi bi-lightning-charge-fill"></i> Quản Lý Điện Lực
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.index') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('customers.list') }}">
+                            <i class="bi bi-people"></i> Khách hàng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('employees.list') }}">
+                            <i class="bi bi-person-badge"></i> Nhân viên
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('meters.list') }}">
+                            <i class="bi bi-speedometer"></i> Công tơ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('invoices.list') }}">
+                            <i class="bi bi-receipt"></i> Hóa đơn
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contracts.list') }}">
+                            <i class="bi bi-file-earmark-text"></i> Hợp đồng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('salaries.list') }}">
+                            <i class="bi bi-cash-stack"></i> Lương
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('pricing.list') }}">
+                            <i class="bi bi-currency-dollar"></i> Bảng giá
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-bar-chart"></i> Báo cáo
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.customer_distribution') }}">
+                                <i class="bi bi-pie-chart"></i> Phân bổ KH
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.revenue_forecast') }}">
+                                <i class="bi bi-graph-up-arrow"></i> Dự báo doanh thu
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('dashboard.financial_report') }}">
+                                <i class="bi bi-file-earmark-spreadsheet"></i> Báo cáo tài chính
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('employees.managers_performance') }}">
+                                <i class="bi bi-graph-up"></i> Hiệu suất Quản lý
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('employees.installers_performance') }}">
+                                <i class="bi bi-tools"></i> Hiệu suất Lắp đặt
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('meters.maintenance_alerts') }}">
+                                <i class="bi bi-exclamation-triangle"></i> Cảnh báo bảo trì
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('meters.abnormal_consumption') }}">
+                                <i class="bi bi-lightning"></i> Tiêu thụ bất thường
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('invoices.overdue') }}">
+                                <i class="bi bi-clock-history"></i> Hóa đơn quá hạn
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('contracts.expiring') }}">
+                                <i class="bi bi-calendar-x"></i> HĐ sắp hết hạn
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="container my-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center text-muted py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">© 2026 Hệ thống Quản lý Điện lực - Demo for Academic Purpose</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

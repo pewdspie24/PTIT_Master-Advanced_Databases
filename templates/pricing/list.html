@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Bảng Giá Điện{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-currency-dollar"></i> Bảng Giá Điện</h2>
+    <div class="row">
+        {% for table in pricing_tables %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ table.tenBang }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{{ table.moTa or 'Không có mô tả' }}</p>
+                    <a href="{{ url_for('pricing.detail', table_id=table.ma) }}" class="btn btn-info">
+                        <i class="bi bi-eye"></i> Xem chi tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

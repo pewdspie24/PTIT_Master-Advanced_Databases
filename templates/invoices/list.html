@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách Hóa đơn{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-receipt"></i> Danh sách Hóa đơn</h1>
+
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('invoices.list') }}" class="row g-3">
+            <div class="col-md-10">
+                <select name="status" class="form-select">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="Chua thanh toan" {% if status_filter == 'Chua thanh toan' %}selected{% endif %}>Chưa thanh toán</option>
+                    <option value="Da thanh toan" {% if status_filter == 'Da thanh toan' %}selected{% endif %}>Đã thanh toán</option>
+                    <option value="Qua han" {% if status_filter == 'Qua han' %}selected{% endif %}>Quá hạn</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter"></i> Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Invoice Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã công tơ</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày lập</th>
+                        <th>Ngày ghi nhận</th>
+                        <th>Tiêu thụ (kWh)</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td><strong>{{ invoice.maCongTo }}</strong></td>
+                        <td>{{ invoice.tenKhachHang }}</td>
+                        <td>{{ invoice.ngayLapDon }}</td>
+                        <td>{{ invoice.ngayGhiNhan }}</td>
+                        <td>{{ invoice.tieuThu }} kWh</td>
+                        <td>
+                            {% if invoice.trangThaiTT == 'Da thanh toan' %}
+                                <span class="badge bg-success">Đã thanh toán</span>
+                            {% elif invoice.trangThaiTT == 'Chua thanh toan' %}
+                                <span class="badge bg-warning">Chưa thanh toán</span>
+                            {% elif invoice.trangThaiTT == 'Qua han' %}
+                                <span class="badge bg-danger">Quá hạn</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ invoice.trangThaiTT }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('invoices.calculate', meter_id=invoice.maCongTo, date=invoice.ngayGhiNhan) }}" 
+                               class="btn btn-sm btn-info">
+                                <i class="bi bi-calculator"></i> Tính tiền
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Không tìm thấy hóa đơn</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

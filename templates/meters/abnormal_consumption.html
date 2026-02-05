@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Cảnh báo Tiêu thụ điện Bất thường{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-graph-up-arrow text-warning"></i> Tiêu thụ điện Bất thường</h1>
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="month" class="form-label"><i class="bi bi-calendar-month"></i> Tháng</label>
+                <select class="form-select" id="month" name="month">
+                    {% for m in range(1, 13) %}
+                    <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>Tháng {{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="year" class="form-label"><i class="bi bi-calendar"></i> Năm</label>
+                <input type="number" class="form-control" id="year" name="year" 
+                       value="{{ selected_year|default(2024) }}" min="2020" max="2030">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i>
+    <strong>Danh sách công tơ có mức tiêu thụ tăng gấp đôi so với tháng trước (Tháng {{ selected_month|default('hiện tại') }}/{{ selected_year|default(2024) }})</strong>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã công tơ</th>
+                        <th>Khách hàng</th>
+                        <th>Địa chỉ</th>
+                        <th>Tháng này (kWh)</th>
+                        <th>Tháng trước (kWh)</th>
+                        <th>Chênh lệch</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for meter in abnormal_meters %}
+                    <tr>
+                        <td><strong>{{ meter.maCongTo or meter[0] }}</strong></td>
+                        <td>{{ meter.tenKhachHang or meter[1] }}</td>
+                        <td>{{ meter.diaChi or meter[2] }}</td>
+                        <td><span class="badge bg-danger">{{ meter.SanLuongThangNay or meter[3] }}</span></td>
+                        <td>{{ meter.SanLuongThangTruoc or meter[4] }}</td>
+                        <td><strong class="text-danger">+{{ meter.ChenhLech or meter[5] }} kWh</strong></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-success">
+                            <i class="bi bi-check-circle"></i> Không có công tơ nào có tiêu thụ bất thường
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

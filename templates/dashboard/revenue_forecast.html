@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Dự báo Doanh thu{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-graph-up-arrow"></i> Dự báo Doanh thu tháng tới</h2>
+    
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="year" class="form-label"><i class="bi bi-calendar"></i> Năm</label>
+                    <input type="number" class="form-control" id="year" name="year" 
+                           value="{{ selected_year|default(2024) }}" min="2020" max="2030">
+                </div>
+                <div class="col-md-3">
+                    <label for="lookback" class="form-label"><i class="bi bi-arrow-left-right"></i> Số tháng phân tích</label>
+                    <input type="number" class="form-control" id="lookback" name="lookback" 
+                           value="{{ lookback_months|default(3) }}" min="1" max="12">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-success">
+                    <tr>
+                        <th>Chi nhánh</th>
+                        <th>Doanh thu dự báo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in forecast %}
+                    <tr>
+                        <td><strong>{{ item.ChiNhánh }}</strong></td>
+                        <td><span class="badge bg-success fs-6">{{ "{:,.0f}".format(item.DoanhThuDuBao or 0) }} đ</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-4">Chưa có dữ liệu dự báo</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

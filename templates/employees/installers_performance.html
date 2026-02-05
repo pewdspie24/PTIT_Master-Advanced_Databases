@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Hiệu suất Lắp đặt{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="bi bi-tools"></i> Hiệu suất Lắp đặt - Số công tơ đã lắp</h2>
+    
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="month" class="form-label"><i class="bi bi-calendar-month"></i> Tháng</label>
+                    <select class="form-select" id="month" name="month">
+                        {% for m in range(1, 13) %}
+                        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>Tháng {{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="year" class="form-label"><i class="bi bi-calendar"></i> Năm</label>
+                    <input type="number" class="form-control" id="year" name="year" 
+                           value="{{ selected_year|default(2024) }}" min="2020" max="2030">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-info">
+                    <tr>
+                        <th>Mã NV</th>
+                        <th>Họ tên</th>
+                        <th>Số công tơ đã lắp</th>
+                        <th>Xếp hạng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for installer in installers_stats %}
+                    <tr>
+                        <td>{{ installer.maNhanVien }}</td>
+                        <td>{{ installer.HoTen }}</td>
+                        <td><span class="badge bg-info">{{ installer.SoCongToDaLap }}</span></td>
+                        <td>
+                            {% if loop.index == 1 %}<i class="bi bi-trophy-fill text-warning"></i> #1
+                            {% elif loop.index == 2 %}<i class="bi bi-trophy-fill text-secondary"></i> #2
+                            {% elif loop.index == 3 %}<i class="bi bi-trophy-fill" style="color: #cd7f32;"></i> #3
+                            {% else %}#{{ loop.index }}{% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">Chưa có dữ liệu tháng này</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

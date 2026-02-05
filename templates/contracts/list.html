@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách Hợp đồng{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-text"></i> Danh sách Hợp đồng</h2>
+        <a href="{{ url_for('contracts.expiring') }}" class="btn btn-warning">
+            <i class="bi bi-exclamation-triangle"></i> Sắp hết hạn
+        </a>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã HĐ</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Thời hạn</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contract in contracts %}
+                        <tr>
+                            <td><strong>{{ contract.maHopDong }}</strong></td>
+                            <td>{{ contract.tenKhachHang }}</td>
+                            <td>{{ contract.ngayBatDau.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ contract.thoiHan }} tháng</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if contract.trangThai == 'HieuLuc' else 'secondary' }}">
+                                    {{ contract.trangThai }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('contracts.detail', id=contract.maHopDong) }}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> Xem
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                <p class="mt-2">Chưa có hợp đồng nào</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

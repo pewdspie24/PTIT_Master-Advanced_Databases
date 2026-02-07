@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Sửa Nhân viên{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-person-gear"></i> Sửa Nhân viên</h2>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Mã nhân viên</label>
+                            <input type="text" class="form-control" value="{{ employee.maNhanVien }}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" name="email" value="{{ employee.email }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Họ *</label>
+                            <input type="text" class="form-control" name="ho" value="{{ employee.ho }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Tên đệm</label>
+                            <input type="text" class="form-control" name="tenDem" value="{{ employee.tenDem or '' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Tên *</label>
+                            <input type="text" class="form-control" name="tenRieng" value="{{ employee.tenRieng }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Ngày sinh *</label>
+                            <input type="date" class="form-control" name="ngaySinh" value="{{ employee.ngaySinh }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Mã số thuế *</label>
+                            <input type="text" class="form-control" name="maSoThue" value="{{ employee.maSoThue }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Chi nhánh *</label>
+                            <select class="form-select" name="maChiNhanh" required>
+                                {% for branch in branches %}
+                                <option value="{{ branch.maChiNhanh }}" {% if employee.maChiNhanh == branch.maChiNhanh %}selected{% endif %}>
+                                    {{ branch.ten }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Vai trò *</label>
+                            <select class="form-select" name="role" id="roleSelect" required>
+                                <option value="LapDat">Lắp đặt</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="lapDatFields">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Số thẻ kỹ thuật</label>
+                                <input type="text" class="form-control" name="soTheKyThuat" value="{{ employee.lap_dat_info.soTheKyThuat if employee.lap_dat_info else '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Chứng chỉ an toàn điện</label>
+                                <input type="text" class="form-control" name="ccAnToanDien" value="{{ employee.lap_dat_info.ccAnToanDien if employee.lap_dat_info else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Cập nhật nhân viên
+                    </button>
+                    <a href="{{ url_for('employees.list') }}" class="btn btn-secondary">
+                        <i class="bi bi-x"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

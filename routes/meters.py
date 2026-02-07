@@ -103,6 +103,55 @@ def abnormal_consumption():
                          selected_year=current_year)
 
 
+@bp.route('/edit/<string:id>', methods=['GET', 'POST'])
+def edit(id):
+    """Edit existing electric meter"""
+    meter = CongToDien.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        try:
+            query = text("""
+                UPDATE CongToDien 
+                SET giaMua = :gia_mua, hanSuDung = :han_su_dung, 
+                    ngayLapDat = :ngay_lap_dat, maCongTy = :ma_cong_ty,
+                    maKhachHang = :ma_khach_hang, maNVLapDat = :ma_nv_lap_dat
+                WHERE maCongTo = :ma_cong_to
+            """)
+            
+            db.session.execute(query, {
+                'ma_cong_to': id,
+                'gia_mua': request.form['giaMua'],
+                'han_su_dung': request.form['hanSuDung'],
+                'ngay_lap_dat': request.form['ngayLapDat'],
+                'ma_cong_ty': request.form['maCongTy'],
+                'ma_khach_hang': request.form['maKhachHang'],
+                'ma_nv_lap_dat': request.form['maNhanVienLapDat']
+            })
+            db.session.commit()
+            
+            flash('Cập nhật công tơ điện thành công!', 'success')
+            return redirect(url_for('meters.detail', id=id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Lỗi: {str(e)}', 'danger')
+    
+    customers = KhachHang.query.all()
+    installers = db.session.query(
+        NhanVien.maNhanVien,
+        NhanVien.ho,
+        NhanVien.tenRieng
+    ).join(
+        NhanVienLapDat, NhanVien.maNhanVien == NhanVienLapDat.maNhanVienLapDat
+    ).all()
+    companies = db.session.execute(text("SELECT DISTINCT maCongTy, tenCongTy FROM CongTy")).fetchall()
+    
+    return render_template('meters/edit.html',
+                         meter=meter,
+                         customers=customers,
+                         installers=installers,
+                         companies=companies)
+
+
 @bp.route('/add', methods=['GET', 'POST'])
 def add():
     """Add new electric meter for customer"""

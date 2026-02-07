@@ -103,8 +103,14 @@
                 <h5 class="mb-0"><i class="bi bi-calculator"></i> Thông tin Kế toán</h5>
             </div>
             <div class="card-body">
-                <p><strong>Hạn mức duyệt:</strong> {{ "{:,.0f}".format(employee.ke_toan_info.hanMucDuyet) }} VNĐ</p>
-                <p><strong>Chứng chỉ kế toán:</strong> {{ employee.ke_toan_info.ccKeToan }}</p>
+                <p><strong>Hạn mức duyệt:</strong> 
+                    {% if employee.ke_toan_info.hanMucDuyet %}
+                        {{ "{:,.0f}".format(employee.ke_toan_info.hanMucDuyet) }} VNĐ
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+                <p><strong>Chứng chỉ kế toán:</strong> {{ employee.ke_toan_info.ccKeToan or 'N/A' }}</p>
             </div>
         </div>
         {% elif employee.ho_tro_info %}

@@ -3,7 +3,12 @@
 {% block title %}Danh sách Nhân viên{% endblock %}
 
 {% block content %}
-<h1 class="mb-4"><i class="bi bi-person-badge"></i> Danh sách Nhân viên</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-person-badge"></i> Danh sách Nhân viên</h1>
+    <a href="{{ url_for('employees.add') }}" class="btn btn-success">
+        <i class="bi bi-person-plus"></i> Thêm Nhân viên
+    </a>
+</div>
 
 <!-- Filter Form -->
 <div class="card mb-4">
@@ -74,6 +79,9 @@
                         <td>
                             <a href="{{ url_for('employees.detail', id=emp.maNhanVien) }}" class="btn btn-sm btn-primary">
                                 <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('employees.edit', id=emp.maNhanVien) }}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i>
                             </a>
                         </td>
                     </tr>

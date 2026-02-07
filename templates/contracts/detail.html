@@ -7,9 +7,12 @@
         <div class="card-body">
             <table class="table">
                 <tr><th>Mã hợp đồng:</th><td>{{ contract.maHopDong }}</td></tr>
-                <tr><th>Khách hàng:</th><td>{{ contract.khachHang.tenKhachHang }}</td></tr>
+                <tr><th>Khách hàng:</th><td>{{ contract.tenKhachHang }}</td></tr>
+                <tr><th>Ngày ký:</th><td>{{ contract.ngayKy.strftime('%d/%m/%Y') if contract.ngayKy else 'N/A' }}</td></tr>
                 <tr><th>Ngày bắt đầu:</th><td>{{ contract.ngayBatDau.strftime('%d/%m/%Y') }}</td></tr>
-                <tr><th>Thời hạn:</th><td>{{ contract.thoiHan }} tháng</td></tr>
+                <tr><th>Thời hạn:</th><td>{{ contract.thoiHan }} năm</td></tr>
+                <tr><th>Chi nhánh:</th><td>{{ contract.tenChiNhanh }}</td></tr>
+                <tr><th>Nhân viên quản lý:</th><td>{{ contract.ho }} {{ contract.tenRieng }}</td></tr>
                 <tr><th>Trạng thái:</th><td><span class="badge bg-success">{{ contract.trangThai }}</span></td></tr>
             </table>
             <a href="{{ url_for('contracts.list') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Quay lại</a>

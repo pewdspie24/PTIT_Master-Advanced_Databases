@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Thêm Hóa đơn{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-receipt-cutoff"></i> Thêm Hóa đơn mới</h2>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('invoices.add') }}">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn chỉ số điện *</label>
+                            <select class="form-select" name="maCongTo_ngayGhiNhan" id="readingSelect" required>
+                                <option value="">-- Chọn chỉ số điện --</option>
+                                {% for reading in available_readings %}
+                                <option value="{{ reading.maCongTo }}|{{ reading.ngayGhiNhan }}">
+                                    {{ reading.maCongTo }} - {{ reading.tenKhachHang }} - 
+                                    {{ reading.ngayGhiNhan.strftime('%d/%m/%Y') }} ({{ reading.tieuThu }} kWh)
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Chỉ hiển thị chỉ số điện chưa có hóa đơn</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Kế toán lập đơn *</label>
+                            <select class="form-select" name="maKeToan" required>
+                                {% for acc in accountants %}
+                                <option value="{{ acc.maNhanVien }}">{{ acc.ho }} {{ acc.tenRieng }} ({{ acc.maNhanVien }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" name="maCongTo" id="maCongTo">
+                <input type="hidden" name="ngayGhiNhan" id="ngayGhiNhan">
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Ngày lập đơn *</label>
+                            <input type="date" class="form-control" name="ngayLapDon" 
+                                   value="{{ today }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Trạng thái thanh toán *</label>
+                            <select class="form-select" name="trangThaiTT" required>
+                                <option value="Chua thanh toan" selected>Chưa thanh toán</option>
+                                <option value="Da thanh toan">Đã thanh toán</option>
+                                <option value="Qua han">Quá hạn</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Thêm hóa đơn
+                    </button>
+                    <a href="{{ url_for('invoices.list') }}" class="btn btn-secondary">
+                        <i class="bi bi-x"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('readingSelect').addEventListener('change', function() {
+    const value = this.value;
+    if (value) {
+        const [maCongTo, ngayGhiNhan] = value.split('|');
+        document.getElementById('maCongTo').value = maCongTo;
+        document.getElementById('ngayGhiNhan').value = ngayGhiNhan;
+    }
+});
+</script>
+{% endblock %}

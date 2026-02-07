@@ -233,7 +233,7 @@ BEGIN
         JOIN KhachHang kh ON ct.maKhachHang = kh.maKhachHang
         WHERE MONTH(hd.ngayLapDon) = p_Thang 
           AND YEAR(hd.ngayLapDon) = p_Nam
-          AND kh.maChiNhanh = p_MaChiNhanh;
+          AND kh.maChiNhanh COLLATE utf8mb4_unicode_ci = p_MaChiNhanh COLLATE utf8mb4_unicode_ci;
     
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_Done = 1;
 
@@ -258,11 +258,15 @@ BEGIN
     -- Bước này giúp đồng bộ dữ liệu tính toán được vào bảng báo cáo
     UPDATE ChiPhiCongTy
     SET doanhThuThang = IFNULL(v_DoanhThuHeThong, 0)
-    WHERE maChiNhanh = p_MaChiNhanh AND namTaiChinh = p_Nam AND thangTaiChinh = p_Thang;
+    WHERE maChiNhanh COLLATE utf8mb4_unicode_ci = p_MaChiNhanh COLLATE utf8mb4_unicode_ci 
+      AND namTaiChinh = p_Nam 
+      AND thangTaiChinh = p_Thang;
 
     -- 3. Hiển thị kết quả cuối cùng
     SELECT * FROM ChiPhiCongTy 
-    WHERE maChiNhanh = p_MaChiNhanh AND namTaiChinh = p_Nam AND thangTaiChinh = p_Thang;
+    WHERE maChiNhanh COLLATE utf8mb4_unicode_ci = p_MaChiNhanh COLLATE utf8mb4_unicode_ci 
+      AND namTaiChinh = p_Nam 
+      AND thangTaiChinh = p_Thang;
 END$$
 
 -- Procedure: Alert for meters that need maintenance

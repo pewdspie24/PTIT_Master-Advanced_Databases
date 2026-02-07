@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from sqlalchemy import text, func
 from datetime import datetime, timedelta
-from models import db, HoaDon, ChiSoDienHangThang, CongToDien, KhachHang, SDT_KhachHang
+from models import db, HoaDon, ChiSoDienHangThang, CongToDien, KhachHang, SDT_KhachHang, KeToan, NhanVien
 
 bp = Blueprint('invoices', __name__, url_prefix='/invoices')
 
@@ -93,24 +93,125 @@ def update_status(meter_id, date):
     return redirect(url_for('invoices.list'))
 
 
+@bp.route('/add', methods=['GET', 'POST'])
+def add():
+    """Add new invoice"""
+    if request.method == 'POST':
+        try:
+            query = text("""
+                INSERT INTO HoaDon (maCongTo, ngayGhiNhan, trangThaiTT, ngayLapDon, maKeToan)
+                VALUES (:ma_cong_to, :ngay_ghi_nhan, :trang_thai, :ngay_lap_don, :ma_ke_toan)
+            """)
+            
+            db.session.execute(query, {
+                'ma_cong_to': request.form['maCongTo'],
+                'ngay_ghi_nhan': request.form['ngayGhiNhan'],
+                'trang_thai': request.form.get('trangThaiTT', 'Chua thanh toan'),
+                'ngay_lap_don': request.form.get('ngayLapDon', datetime.now().date()),
+                'ma_ke_toan': request.form['maKeToan']
+            })
+            db.session.commit()
+            
+            flash('Thêm hóa đơn thành công!', 'success')
+            return redirect(url_for('invoices.list'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Lỗi: {str(e)}', 'danger')
+    
+    # Get available meter readings that don't have invoices yet
+    available_readings = db.session.query(
+        ChiSoDienHangThang.maCongTo,
+        ChiSoDienHangThang.ngayGhiNhan,
+        KhachHang.tenKhachHang,
+        (ChiSoDienHangThang.soDienMoi - ChiSoDienHangThang.soDienCu).label('tieuThu')
+    ).join(
+        CongToDien, ChiSoDienHangThang.maCongTo == CongToDien.maCongTo
+    ).join(
+        KhachHang, CongToDien.maKhachHang == KhachHang.maKhachHang
+    ).outerjoin(
+        HoaDon,
+        (ChiSoDienHangThang.maCongTo == HoaDon.maCongTo) &
+        (ChiSoDienHangThang.ngayGhiNhan == HoaDon.ngayGhiNhan)
+    ).filter(
+        HoaDon.maCongTo.is_(None)  # Only readings without invoices
+    ).all()
+    
+    # Get accountants
+    accountants = db.session.query(
+        NhanVien.maNhanVien,
+        NhanVien.ho,
+        NhanVien.tenRieng
+    ).join(
+        KeToan, NhanVien.maNhanVien == KeToan.maKeToan
+    ).all()
+    
+    return render_template('invoices/form.html',
+                         available_readings=available_readings,
+                         accountants=accountants,
+                         today=datetime.now().strftime('%Y-%m-%d'))
+
+
 @bp.route('/calculate/<string:meter_id>/<string:date>')
 def calculate(meter_id, date):
-    """Calculate bill amount using stored procedure sp_TinhTienDien"""
+    """Calculate bill amount for meter reading"""
     try:
-        # Call stored procedure
+        # Calculate electricity bill using tiered pricing
         query = text("""
-            CALL sp_TinhTienDien(:meter_id, :date, @tong_tien);
-            SELECT @tong_tien AS tongTien;
+            SELECT 
+                cs.maCongTo,
+                cs.ngayGhiNhan,
+                (cs.soDienMoi - cs.soDienCu) AS sanLuong,
+                kh.maBangGiaDien,
+                kh.tenKhachHang
+            FROM ChiSoDienHangThang cs
+            JOIN CongToDien ct ON cs.maCongTo = ct.maCongTo
+            JOIN KhachHang kh ON ct.maKhachHang = kh.maKhachHang
+            WHERE cs.maCongTo = :meter_id AND cs.ngayGhiNhan = :date
         """)
         
-        db.session.execute(query, {'meter_id': meter_id, 'date': date})
-        result = db.session.execute(text("SELECT @tong_tien AS tongTien"))
-        tong_tien = result.fetchone()[0]
+        result = db.session.execute(query, {'meter_id': meter_id, 'date': date})
+        reading = result.fetchone()
+        
+        if not reading:
+            flash('Không tìm thấy chỉ số điện', 'danger')
+            return redirect(url_for('invoices.list'))
+        
+        san_luong = reading.sanLuong
+        ma_bang_gia = reading.maBangGiaDien
+        
+        # Get price tiers
+        tier_query = text("""
+            SELECT thuTuCapBac, giaDienTrenKwh, tuSoDien, toiSoDien
+            FROM BacGiaDien
+            WHERE maBangGia = :ma_bang_gia
+            ORDER BY thuTuCapBac ASC
+        """)
+        
+        tiers = db.session.execute(tier_query, {'ma_bang_gia': ma_bang_gia}).fetchall()
+        
+        # Calculate total cost
+        tong_tien = 0
+        remaining = san_luong
+        
+        for tier in tiers:
+            if remaining <= 0:
+                break
+            
+            if tier.toiSoDien is None:
+                # Last tier - unlimited
+                kwh_in_tier = remaining
+            else:
+                kwh_in_tier = min(tier.toiSoDien - tier.tuSoDien, remaining)
+            
+            tong_tien += kwh_in_tier * float(tier.giaDienTrenKwh)
+            remaining -= kwh_in_tier
         
         return render_template('invoices/calculate.html',
                              meter_id=meter_id,
                              date=date,
-                             tong_tien=tong_tien)
+                             tong_tien=tong_tien,
+                             customer_name=reading.tenKhachHang,
+                             consumption=san_luong)
     except Exception as e:
         flash(f'Lỗi tính tiền: {str(e)}', 'danger')
         return redirect(url_for('invoices.list'))

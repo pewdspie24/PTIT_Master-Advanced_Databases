@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from sqlalchemy import text
 from datetime import datetime
-from models import db, HopDong, KhachHang, NhanVien
+from models import db, HopDong, KhachHang, NhanVien, ChiNhanh, NhanVienQuanLy
 
 bp = Blueprint('contracts', __name__, url_prefix='/contracts')
 
@@ -23,9 +23,9 @@ def list():
 
 @bp.route('/expiring')
 def expiring():
-    """Query contracts expiring in specified days"""
+    """Query contracts expiring in specified years"""
     # Get parameters from user or use defaults
-    days_threshold = request.args.get('days', type=int) or 30
+    years_threshold = request.args.get('years', type=int) or 1
     
     query = text("""
         SELECT 
@@ -33,28 +33,149 @@ def expiring():
             kh.maKhachHang,
             kh.tenKhachHang,
             hd.ngayBatDau, 
-            DATE_ADD(hd.ngayBatDau, INTERVAL hd.thoiHan MONTH) AS NgayHetHan
+            DATE_ADD(hd.ngayBatDau, INTERVAL hd.thoiHan YEAR) AS NgayHetHan
         FROM HopDong hd
         JOIN KhachHang kh ON hd.maKhachHang = kh.maKhachHang
-        WHERE DATE_ADD(hd.ngayBatDau, INTERVAL hd.thoiHan MONTH) <= DATE_ADD(CURDATE(), INTERVAL :days_threshold DAY)
-          AND hd.trangThai = 'HieuLuc'
+        WHERE DATE_ADD(hd.ngayBatDau, INTERVAL hd.thoiHan YEAR) BETWEEN CURDATE() 
+          AND DATE_ADD(CURDATE(), INTERVAL :years_threshold YEAR)
+          AND hd.trangThai = 'Hieu luc'
         ORDER BY NgayHetHan ASC
     """)
     
-    result = db.session.execute(query, {'days_threshold': days_threshold})
+    result = db.session.execute(query, {'years_threshold': years_threshold})
     expiring_contracts = result.fetchall()
     
     return render_template('contracts/expiring.html', 
                          expiring_contracts=expiring_contracts,
-                         days_threshold=days_threshold,
+                         years_threshold=years_threshold,
                          now=datetime.now)
 
 
 @bp.route('/<string:id>')
 def detail(id):
     """View contract details"""
+    contract_data = db.session.query(
+        HopDong.maHopDong,
+        HopDong.ngayKy,
+        HopDong.ngayBatDau,
+        HopDong.trangThai,
+        HopDong.thoiHan,
+        KhachHang.tenKhachHang,
+        ChiNhanh.ten.label('tenChiNhanh'),
+        NhanVien.ho,
+        NhanVien.tenRieng
+    ).join(
+        KhachHang, HopDong.maKhachHang == KhachHang.maKhachHang
+    ).join(
+        ChiNhanh, HopDong.maChiNhanh == ChiNhanh.maChiNhanh
+    ).join(
+        NhanVien, HopDong.maNVQuanLy == NhanVien.maNhanVien
+    ).filter(
+        HopDong.maHopDong == id
+    ).first_or_404()
+    
+    return render_template('contracts/detail.html', contract=contract_data)
+
+
+@bp.route('/add', methods=['GET', 'POST'])
+def add():
+    """Add new contract"""
+    if request.method == 'POST':
+        try:
+            query = text("""
+                INSERT INTO HopDong (maHopDong, ngayKy, ngayBatDau, trangThai, thoiHan, maChiNhanh, maNVQuanLy, maKhachHang)
+                VALUES (:ma_hd, :ngay_ky, :ngay_bat_dau, :trang_thai, :thoi_han, :ma_chi_nhanh, :ma_nv_ql, :ma_kh)
+            """)
+            
+            db.session.execute(query, {
+                'ma_hd': request.form['maHopDong'],
+                'ngay_ky': request.form['ngayKy'],
+                'ngay_bat_dau': request.form['ngayBatDau'],
+                'trang_thai': request.form.get('trangThai', 'Hieu luc'),
+                'thoi_han': request.form['thoiHan'],
+                'ma_chi_nhanh': request.form['maChiNhanh'],
+                'ma_nv_ql': request.form['maNVQuanLy'],
+                'ma_kh': request.form['maKhachHang']
+            })
+            db.session.commit()
+            
+            flash('Thêm hợp đồng thành công!', 'success')
+            return redirect(url_for('contracts.detail', id=request.form['maHopDong']))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Lỗi: {str(e)}', 'danger')
+    
+    # Get data for dropdowns
+    customers = KhachHang.query.all()
+    branches = ChiNhanh.query.all()
+    managers = db.session.query(
+        NhanVien.maNhanVien,
+        NhanVien.ho,
+        NhanVien.tenRieng
+    ).join(
+        NhanVienQuanLy, NhanVien.maNhanVien == NhanVienQuanLy.maNhanVienQuanLy
+    ).all()
+    
+    return render_template('contracts/form.html',
+                         customers=customers,
+                         branches=branches,
+                         managers=managers,
+                         contract=None)
+
+
+@bp.route('/edit/<string:id>', methods=['GET', 'POST'])
+def edit(id):
+    """Edit existing contract"""
     contract = HopDong.query.get_or_404(id)
-    return render_template('contracts/detail.html', contract=contract)
+    
+    if request.method == 'POST':
+        try:
+            query = text("""
+                UPDATE HopDong 
+                SET ngayKy = :ngay_ky, 
+                    ngayBatDau = :ngay_bat_dau, 
+                    trangThai = :trang_thai, 
+                    thoiHan = :thoi_han,
+                    maChiNhanh = :ma_chi_nhanh,
+                    maNVQuanLy = :ma_nv_ql,
+                    maKhachHang = :ma_kh
+                WHERE maHopDong = :ma_hd
+            """)
+            
+            db.session.execute(query, {
+                'ma_hd': id,
+                'ngay_ky': request.form['ngayKy'],
+                'ngay_bat_dau': request.form['ngayBatDau'],
+                'trang_thai': request.form['trangThai'],
+                'thoi_han': request.form['thoiHan'],
+                'ma_chi_nhanh': request.form['maChiNhanh'],
+                'ma_nv_ql': request.form['maNVQuanLy'],
+                'ma_kh': request.form['maKhachHang']
+            })
+            db.session.commit()
+            
+            flash('Cập nhật hợp đồng thành công!', 'success')
+            return redirect(url_for('contracts.detail', id=id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Lỗi: {str(e)}', 'danger')
+    
+    # Get data for dropdowns
+    customers = KhachHang.query.all()
+    branches = ChiNhanh.query.all()
+    managers = db.session.query(
+        NhanVien.maNhanVien,
+        NhanVien.ho,
+        NhanVien.tenRieng
+    ).join(
+        NhanVienQuanLy, NhanVien.maNhanVien == NhanVienQuanLy.maNhanVienQuanLy
+    ).all()
+    
+    return render_template('contracts/form.html',
+                         customers=customers,
+                         branches=branches,
+                         managers=managers,
+                         contract=contract)
 
 
 @bp.route('/support/add', methods=['GET', 'POST'])

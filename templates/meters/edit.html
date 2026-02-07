@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Sửa Công tơ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-speedometer"></i> Sửa Công tơ điện</h2>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Mã công tơ</label>
+                            <input type="text" class="form-control" value="{{ meter.maCongTo }}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Khách hàng *</label>
+                            <select class="form-select" name="maKhachHang" required>
+                                {% for customer in customers %}
+                                <option value="{{ customer.maKhachHang }}" {% if meter.maKhachHang == customer.maKhachHang %}selected{% endif %}>
+                                    {{ customer.tenKhachHang }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Giá mua *</label>
+                            <input type="number" class="form-control" name="giaMua" value="{{ meter.giaMua }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Hạn sử dụng (năm) *</label>
+                            <input type="number" class="form-control" name="hanSuDung" value="{{ meter.hanSuDung }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Ngày lắp đặt *</label>
+                            <input type="date" class="form-control" name="ngayLapDat" value="{{ meter.ngayLapDat }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Công ty sản xuất *</label>
+                            <select class="form-select" name="maCongTy" required>
+                                {% for company in companies %}
+                                <option value="{{ company.maCongTy }}" {% if meter.maCongTy == company.maCongTy %}selected{% endif %}>
+                                    {{ company.tenCongTy }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Nhân viên lắp đặt *</label>
+                            <select class="form-select" name="maNhanVienLapDat" required>
+                                {% for installer in installers %}
+                                <option value="{{ installer.maNhanVien }}" {% if meter.maNVLapDat == installer.maNhanVien %}selected{% endif %}>
+                                    {{ installer.ho }} {{ installer.tenRieng }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Cập nhật công tơ
+                    </button>
+                    <a href="{{ url_for('meters.list') }}" class="btn btn-secondary">
+                        <i class="bi bi-x"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

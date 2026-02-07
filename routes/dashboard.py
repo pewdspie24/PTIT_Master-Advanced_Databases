@@ -88,7 +88,7 @@ def revenue_forecast():
         JOIN ChiNhanh cn ON hd.maChiNhanh = cn.maChiNhanh
         WHERE hd.namTaiChinh = :year
           AND hd.thangTaiChinh >= :start_month
-        GROUP BY cn.maChiNhanh
+        GROUP BY cn.maChiNhanh, cn.ten
     """)
     
     current_month = datetime.now().month
@@ -105,17 +105,30 @@ def revenue_forecast():
 
 @bp.route('/financial-report')
 def financial_report():
-    """Generate financial report using stored procedure sp_BaoCaoTaiChinh"""
+    """Generate financial report for branch"""
     from models import ChiNhanh
     
     # Get parameters from query string or use defaults
     month = request.args.get('month', type=int) or datetime.now().month
     year = request.args.get('year', type=int) or datetime.now().year
-    branch_id = request.args.get('branch', 'CN_HCM01')
+    branch_id = request.args.get('branch') or 'CN001'
     
     try:
-        # Call stored procedure
-        query = text("CALL sp_BaoCaoTaiChinh(:month, :year, :branch)")
+        # Get financial data directly instead of stored procedure
+        query = text("""
+            SELECT 
+                maChiNhanh,
+                namTaiChinh,
+                thangTaiChinh,
+                chiPhiThang,
+                doanhThuThang,
+                (doanhThuThang - chiPhiThang) AS loiNhuanThang
+            FROM ChiPhiCongTy
+            WHERE maChiNhanh = :branch
+              AND namTaiChinh = :year
+              AND thangTaiChinh = :month
+        """)
+        
         result = db.session.execute(query, {
             'month': month,
             'year': year,

@@ -86,7 +86,7 @@ SELECT
 FROM HopDong hd
 JOIN KhachHang kh ON hd.maKhachHang = kh.maKhachHang
 WHERE DATE_ADD(hd.ngayBatDau, INTERVAL hd.thoiHan MONTH) <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) -- Sắp hết hạn trong 30 ngày
-  AND hd.trangThai = 'HieuLuc';
+  AND hd.trangThai = 'Hieu luc';
 
 -- them moi ho tro khach hang tu nhan vien ho tro
 INSERT INTO NV_HoTro_KhachHang (maNVHoTro, maKhachHang, ngayHoTro, lyDoHoTro)

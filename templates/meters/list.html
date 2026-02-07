@@ -3,7 +3,12 @@
 {% block title %}Danh sách Công tơ điện{% endblock %}
 
 {% block content %}
-<h1 class="mb-4"><i class="bi bi-speedometer"></i> Danh sách Công tơ điện</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-speedometer"></i> Danh sách Công tơ điện</h1>
+    <a href="{{ url_for('meters.add') }}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Thêm Công tơ
+    </a>
+</div>
 
 <div class="card">
     <div class="card-body">
@@ -30,6 +35,9 @@
                         <td>
                             <a href="{{ url_for('meters.detail', id=meter.maCongTo) }}" class="btn btn-sm btn-primary">
                                 <i class="bi bi-eye"></i> Chi tiết
+                            </a>
+                            <a href="{{ url_for('meters.edit', id=meter.maCongTo) }}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i> Sửa
                             </a>
                         </td>
                     </tr>

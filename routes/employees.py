@@ -58,6 +58,59 @@ def detail(id):
     return render_template('employees/detail.html', employee=employee)
 
 
+@bp.route('/edit/<string:id>', methods=['GET', 'POST'])
+def edit(id):
+    """Edit existing employee"""
+    employee = NhanVien.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        try:
+            role = request.form['role']
+            
+            # Update parent table
+            query_nv = text("""
+                UPDATE NhanVien 
+                SET maSoThue = :mst, email = :email, ngaySinh = :ngay_sinh, 
+                    ho = :ho, tenDem = :ten_dem, tenRieng = :ten_rieng, maChiNhanh = :ma_chi_nhanh
+                WHERE maNhanVien = :ma_nv
+            """)
+            
+            db.session.execute(query_nv, {
+                'ma_nv': id,
+                'mst': request.form['maSoThue'],
+                'email': request.form['email'],
+                'ngay_sinh': request.form['ngaySinh'],
+                'ho': request.form['ho'],
+                'ten_dem': request.form.get('tenDem', ''),
+                'ten_rieng': request.form['tenRieng'],
+                'ma_chi_nhanh': request.form['maChiNhanh']
+            })
+            
+            # Update role-specific table
+            if role == 'LapDat':
+                db.session.execute(text("DELETE FROM NhanVienLapDat WHERE maNhanVienLapDat = :ma_nv"), {'ma_nv': id})
+                query_role = text("""
+                    INSERT INTO NhanVienLapDat (maNhanVienLapDat, soTheKyThuat, ccAnToanDien)
+                    VALUES (:ma_nv, :the_kt, :cc_atd)
+                    ON DUPLICATE KEY UPDATE soTheKyThuat = :the_kt, ccAnToanDien = :cc_atd
+                """)
+                db.session.execute(query_role, {
+                    'ma_nv': id,
+                    'the_kt': request.form['soTheKyThuat'],
+                    'cc_atd': request.form['ccAnToanDien']
+                })
+            
+            db.session.commit()
+            flash('Cập nhật nhân viên thành công!', 'success')
+            return redirect(url_for('employees.detail', id=id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Lỗi: {str(e)}', 'danger')
+    
+    branches = ChiNhanh.query.all()
+    return render_template('employees/edit.html', employee=employee, branches=branches)
+
+
 @bp.route('/add', methods=['GET', 'POST'])
 def add():
     """Add new employee (technical installation staff)"""

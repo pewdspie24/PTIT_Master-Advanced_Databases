@@ -39,7 +39,7 @@
                 <tbody>
                     {% for item in forecast %}
                     <tr>
-                        <td><strong>{{ item.ChiNhánh }}</strong></td>
+                        <td><strong>{{ item.ChiNhanh }}</strong></td>
                         <td><span class="badge bg-success fs-6">{{ "{:,.0f}".format(item.DoanhThuDuBao or 0) }} đ</span></td>
                     </tr>
                     {% else %}

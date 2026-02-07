@@ -27,10 +27,10 @@
             </div>
             <div class="col-md-7 d-flex align-items-end">
                 <div class="btn-group">
-                    <a href="?days=15" class="btn btn-outline-secondary btn-sm">15 ngày</a>
-                    <a href="?days=30" class="btn btn-outline-secondary btn-sm active">30 ngày</a>
-                    <a href="?days=60" class="btn btn-outline-secondary btn-sm">60 ngày</a>
-                    <a href="?days=90" class="btn btn-outline-secondary btn-sm">90 ngày</a>
+                    <a href="?days=15" class="btn btn-outline-secondary btn-sm {{ 'active' if days_threshold == 15 else '' }}">15 ngày</a>
+                    <a href="?days=30" class="btn btn-outline-secondary btn-sm {{ 'active' if days_threshold == 30 else '' }}">30 ngày</a>
+                    <a href="?days=60" class="btn btn-outline-secondary btn-sm {{ 'active' if days_threshold == 60 else '' }}">60 ngày</a>
+                    <a href="?days=90" class="btn btn-outline-secondary btn-sm {{ 'active' if days_threshold == 90 else '' }}">90 ngày</a>
                 </div>
             </div>
         </form>

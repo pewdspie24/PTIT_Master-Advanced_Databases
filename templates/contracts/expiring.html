@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-exclamation-triangle text-warning"></i> Hợp đồng sắp hết hạn (30 ngày)</h2>
+        <h2><i class="bi bi-exclamation-triangle text-warning"></i> Hợp đồng sắp hết hạn (1 năm)</h2>
         <a href="{{ url_for('contracts.list') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Quay lại
         </a>
@@ -16,9 +16,9 @@
         <div class="card-body">
             <form method="GET" class="row g-3">
                 <div class="col-md-3">
-                    <label for="days" class="form-label"><i class="bi bi-calendar-event"></i> Hết hạn trong (ngày)</label>
-                    <input type="number" class="form-control" id="days" name="days" 
-                           value="{{ days_threshold|default(30) }}" min="1" max="365">
+                    <label for="years" class="form-label"><i class="bi bi-calendar-event"></i> Hết hạn trong (năm)</label>
+                    <input type="number" class="form-control" id="years" name="years" 
+                           value="{{ years_threshold|default(1) }}" min="1" max="10">
                     <small class="text-muted">Cảnh báo hợp đồng sắp hết hạn</small>
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
@@ -28,10 +28,10 @@
                 </div>
                 <div class="col-md-7 d-flex align-items-end">
                     <div class="btn-group">
-                        <a href="?days=7" class="btn btn-outline-warning btn-sm">7 ngày</a>
-                        <a href="?days=15" class="btn btn-outline-warning btn-sm">15 ngày</a>
-                        <a href="?days=30" class="btn btn-outline-warning btn-sm active">30 ngày</a>
-                        <a href="?days=60" class="btn btn-outline-warning btn-sm">60 ngày</a>
+                        <a href="?years=1" class="btn btn-outline-warning btn-sm {{ 'active' if years_threshold == 1 else '' }}">1 năm</a>
+                        <a href="?years=2" class="btn btn-outline-warning btn-sm {{ 'active' if years_threshold == 2 else '' }}">2 năm</a>
+                        <a href="?years=3" class="btn btn-outline-warning btn-sm {{ 'active' if years_threshold == 3 else '' }}">3 năm</a>
+                        <a href="?years=5" class="btn btn-outline-warning btn-sm {{ 'active' if years_threshold == 5 else '' }}">5 năm</a>
                     </div>
                 </div>
             </form>
@@ -40,7 +40,7 @@
     
     {% if expiring_contracts %}
     <div class="alert alert-warning" role="alert">
-        <i class="bi bi-info-circle"></i> Có <strong>{{ expiring_contracts|length }}</strong> hợp đồng sắp hết hạn trong {{ days_threshold|default(30) }} ngày tới
+        <i class="bi bi-info-circle"></i> Có <strong>{{ expiring_contracts|length }}</strong> hợp đồng sắp hết hạn trong {{ years_threshold|default(1) }} năm tới
     </div>
     {% endif %}
     
@@ -61,17 +61,29 @@
                     </thead>
                     <tbody>
                         {% for contract in expiring_contracts %}
-                        {% set days_left = (contract.NgayHetHan - now()).days if contract.NgayHetHan else 0 %}
-                        <tr class="{{ 'table-danger' if days_left <= 7 else '' }}">
+                        {% set days_left = (contract.NgayHetHan - now().date()).days if contract.NgayHetHan else 0 %}
+                        {% set months_left = (days_left / 30.44)|round|int %}
+                        {% set years_left = (days_left / 365.25)|round(1) %}
+                        <tr class="{{ 'table-danger' if days_left <= 90 else '' }}">
                             <td><strong>{{ contract.maHopDong }}</strong></td>
                             <td>{{ contract.maKhachHang }}</td>
                             <td>{{ contract.tenKhachHang }}</td>
                             <td>{{ contract.ngayBatDau.strftime('%d/%m/%Y') if contract.ngayBatDau else '' }}</td>
                             <td>{{ contract.NgayHetHan.strftime('%d/%m/%Y') if contract.NgayHetHan else '' }}</td>
                             <td>
-                                <span class="badge bg-{{ 'danger' if days_left <= 7 else 'warning' }}">
+                                {% if days_left >= 365 %}
+                                <span class="badge bg-{{ 'danger' if days_left <= 90 else 'warning' }}">
+                                    {{ years_left }} năm
+                                </span>
+                                {% elif days_left >= 30 %}
+                                <span class="badge bg-{{ 'danger' if days_left <= 90 else 'warning' }}">
+                                    {{ months_left }} tháng
+                                </span>
+                                {% else %}
+                                <span class="badge bg-danger">
                                     {{ days_left }} ngày
                                 </span>
+                                {% endif %}
                             </td>
                             <td>
                                 <a href="{{ url_for('contracts.detail', id=contract.maHopDong) }}" class="btn btn-sm btn-info">

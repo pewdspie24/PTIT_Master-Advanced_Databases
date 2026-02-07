@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Sửa' if contract else 'Thêm' }} Hợp đồng{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">
+        <i class="bi bi-file-earmark-text"></i> 
+        {{ 'Sửa' if contract else 'Thêm' }} Hợp đồng
+    </h2>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Mã hợp đồng *</label>
+                            <input type="text" class="form-control" name="maHopDong" 
+                                   value="{{ contract.maHopDong if contract else '' }}" 
+                                   {{ 'readonly' if contract else 'required' }}>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Khách hàng *</label>
+                            <select class="form-select" name="maKhachHang" required>
+                                {% for customer in customers %}
+                                <option value="{{ customer.maKhachHang }}" 
+                                        {% if contract and contract.maKhachHang == customer.maKhachHang %}selected{% endif %}>
+                                    {{ customer.tenKhachHang }} ({{ customer.maKhachHang }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Ngày ký *</label>
+                            <input type="date" class="form-control" name="ngayKy" 
+                                   value="{{ contract.ngayKy if contract else '' }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Ngày bắt đầu *</label>
+                            <input type="date" class="form-control" name="ngayBatDau" 
+                                   value="{{ contract.ngayBatDau if contract else '' }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Thời hạn (năm) *</label>
+                            <input type="number" class="form-control" name="thoiHan" 
+                                   value="{{ contract.thoiHan if contract else '1' }}" 
+                                   min="1" max="10" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Chi nhánh *</label>
+                            <select class="form-select" name="maChiNhanh" required>
+                                {% for branch in branches %}
+                                <option value="{{ branch.maChiNhanh }}" 
+                                        {% if contract and contract.maChiNhanh == branch.maChiNhanh %}selected{% endif %}>
+                                    {{ branch.ten }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Nhân viên quản lý *</label>
+                            <select class="form-select" name="maNVQuanLy" required>
+                                {% for manager in managers %}
+                                <option value="{{ manager.maNhanVien }}" 
+                                        {% if contract and contract.maNVQuanLy == manager.maNhanVien %}selected{% endif %}>
+                                    {{ manager.ho }} {{ manager.tenRieng }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Trạng thái *</label>
+                            <select class="form-select" name="trangThai" required>
+                                <option value="Hieu luc" {% if not contract or contract.trangThai == 'Hieu luc' %}selected{% endif %}>Hiệu lực</option>
+                                <option value="Het han" {% if contract and contract.trangThai == 'Het han' %}selected{% endif %}>Hết hạn</option>
+                                <option value="Huy" {% if contract and contract.trangThai == 'Huy' %}selected{% endif %}>Hủy</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> {{ 'Cập nhật' if contract else 'Thêm' }} hợp đồng
+                    </button>
+                    <a href="{{ url_for('contracts.list') }}" class="btn btn-secondary">
+                        <i class="bi bi-x"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
